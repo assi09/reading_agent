@@ -1,0 +1,9 @@
+fastmcp>=4.1
+openai-agents>=0.24
+httpx>=0.28
+feedparser>=6.0
+pydantic>=2.10
+gradio>=6.0
+python-dotenv>=1.0
+pytest>=8.0
+pytest-asyncio>=1.0

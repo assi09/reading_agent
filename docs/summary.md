@@ -1,0 +1,13 @@
+# Part 1: MCP Summary and Server Critique
+
+## Key MCP concepts
+
+Ksenia Se's article presents MCP as a fix for an integration problem. LLMs are "trapped behind information silos", and before MCP every assistant needed custom code for every data source: an M×N problem. MCP turns it into M+N. Each application implements the protocol once, each tool is wrapped once as a server, and any client can use any server, much like USB did for hardware. Servers expose three primitives: **tools** (actions the model can invoke), **resources** (data the application can read), and **prompt templates**. Clients discover them at runtime instead of hard-coding them.
+
+The roles fit together like this. The **Host** is the AI application the user interacts with, for example Claude Desktop, an IDE, or the OpenAI Agents SDK agent in my project. It owns the model and decides *when* to use a capability. Inside the host, an **MCP Client** keeps a one-to-one connection with a single **Server**. The client handles the handshake, capability discovery, and messages over stdio or HTTP. A server is a lightweight process that wraps one system (GitHub, Postgres, a filesystem) and advertises what it can do. The article places MCP in the agent's "action layer": frameworks decide when and why to call a tool, and MCP standardizes *how*. It also notes limitations: operational overhead, a local-first design, immature auth, and that more tools do not mean better tool use without clear descriptions.
+
+## Critique: the Fetch MCP server
+
+The reference Fetch server exposes one tool, `fetch(url, max_length, start_index, raw)`, plus a prompt with the same name. Its interface is **well defined**: the arguments are typed, strictly validated, and bounded. Its behavior is mostly **predictable**: annotations mark it read-only and idempotent, and expected failures (a robots.txt refusal, an unreachable host, a private IP) are raised as explicit `ToolError`s rather than returned as empty strings.
+
+However, the single tool **bundles several responsibilities**: network retrieval, HTML-to-Markdown conversion (toggled by `raw`), robots.txt policy, and pagination. Its own description needs an "and". Pagination state falls on the model, which has to parse an `<error>` string to find the next `start_index`, even though truncation is not an error. The description spends its words convincing the model that it now has internet access instead of documenting the output, and the result is an unstructured string with no output schema. A cleaner design would split it into `fetch_page` (retrieval) and `extract_markdown` (conversion) and return pagination as a structured `next_cursor` field.

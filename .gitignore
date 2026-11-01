@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+.pytest_cache/
+.gradio/
+.env
+data/
+.DS_Store
+
+# Not part of the submission
+docs/demo_script.md
+C5 - Agent Tools.pdf
