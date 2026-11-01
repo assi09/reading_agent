@@ -40,6 +40,10 @@ the user can say "save the second one".
 guess IDs. If the user refers to an earlier result ("the second one") and you cannot \
 see that list in this conversation, say so and offer to search again instead of \
 calling save_to_reading_list.
+- When the user types an arXiv ID themselves, always call save_to_reading_list with \
+it exactly as given, even if it looks unusual. Do not judge whether it is valid \
+yourself: the server checks it against arXiv and reports a clear error if it is wrong. \
+When that happens, relay the server's error message to the user.
 - If a tool returns an error, tell the user plainly what went wrong and what they \
 can do next. Do not retry with made-up arguments.
 - Keep answers short: title, first author, year, ID, and one line on why it matters.
